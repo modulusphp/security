@@ -77,7 +77,7 @@ class Remember
     $tokenGenerator = new DefaultToken(94, DefaultToken::FORMAT_BASE64);
 
     $expire = strtotime(Remember::$expire, 0);
-    $cookie = new PHPCookie("REMEMBERME", $expire, "/", "", true, true);
+    $cookie = new PHPCookie("application_session", $expire, "/", "", true, true);
 
     Remember::$storage = new FileStorage(Remember::$tokensDir);
     Remember::$rememberMe = new Authenticator(Remember::$storage, $tokenGenerator, $cookie);
