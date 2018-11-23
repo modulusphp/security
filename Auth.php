@@ -4,22 +4,9 @@ namespace Modulus\Security;
 
 use Exception;
 use AtlantisPHP\Swish\Route;
-use Modulus\Security\Hash;
-use Modulus\Security\RememberMe;
 
 class Auth
 {
-  /**
-   * $protectedRoutes
-   *
-   * @var array
-   */
-  public static $protectedRoutes = [
-    'showLogin', 'login', 'showMagicLink', 'loginWithEmail', 'loginCallback',
-    'logout', 'showRegistration', 'register', 'showForgotPassword', 'forgot',
-    'showResetPassword', 'resetPassword', 'verify',
-  ];
-
   /**
    * $user
    *
@@ -41,71 +28,32 @@ class Auth
    */
   public static function routes()
   {
-    // Login
-    Route::get('/login', 'Auth\LoginController@showLoginPage')
-          ->name('showLogin')
-          ->middleware('guest');
+    Route::group(['namespace' => 'Auth'], function () {
 
-    Route::post('/login', 'Auth\LoginController@login')
-          ->name('login')
-          ->middleware('guest');
+      Route::group(['middleware' => ['guest']], function () {
 
-    Route::get('/login/email', 'Auth\LoginController@showMagicLinkPage')
-          ->name('showMagicLink')
-          ->middleware('guest');
+        Route::get('login', 'LoginController@showLoginPage')->name('showLogin');
+        Route::post('login', 'LoginController@login')->name('login');
 
-    Route::post('/login/email', 'Auth\LoginController@loginWithEmail')
-          ->name('loginWithEmail')
-          ->middleware('guest');
+        Route::get('login/email', 'LoginController@showMagicLinkPage')->name('showMagicLink');
+        Route::post('login/email', 'LoginController@loginWithEmail')->name('loginWithEmail');
+        Route::get('login/callback/email/', 'LoginController@loginEmailCallback')->name('loginCallback');
 
-    Route::get('/login/callback/email/', 'Auth\LoginController@loginEmailCallback')
-          ->name('loginCallback')
-          ->middleware('guest');
+        Route::get('register', 'RegisterController@showRegistrationPage')->name('showRegistration');
+        Route::post('register', 'RegisterController@register')->name('register');
 
-    // Logout
-    Route::post('/logout', 'Auth\LoginController@logout')
-          ->name('logout')
-          ->middleware('auth');
+        Route::get('password/forgot', 'ForgotPasswordController@showForgotPasswordPage')->name('showForgotPassword');
+        Route::post('password/forgot', 'ForgotPasswordController@forgot')->name('forgot');
 
-    // Register
-    Route::get('/register', 'Auth\RegisterController@showRegistrationPage')
-          ->name('showRegistration')
-          ->middleware('guest');
+        Route::get('password/reset', 'ForgotPasswordController@showResetPasswordPage')->name('showResetPassword');
+        Route::post('password/reset', 'ForgotPasswordController@resetPassword')->name('resetPassword');
 
-    Route::post('/register', 'Auth\RegisterController@register')
-          ->name('register')
-          ->middleware('guest');
+      });
 
-    // Password reset
-    Route::get('/password/forgot', 'Auth\ForgotPasswordController@showForgotPasswordPage')
-          ->name('showForgotPassword')
-          ->middleware('guest');
+      Route::get('logout', 'LoginController@logout')->name('logout')->middleware('private', 'auth');
+      Route::get('account/verify', 'RegisterController@verifyEmail')->name('verify');
 
-    Route::post('/password/forgot', 'Auth\ForgotPasswordController@forgot')
-          ->name('forgot')
-          ->middleware('guest');
-
-    Route::get('/password/reset', 'Auth\ForgotPasswordController@showResetPasswordPage')
-          ->name('showResetPassword')
-          ->middleware('guest');
-
-    Route::post('/password/reset', 'Auth\ForgotPasswordController@resetPassword')
-          ->name('resetPassword')
-          ->middleware('guest');
-
-    Route::get('/account/verify', 'Auth\RegisterController@verifyEmail')
-          ->name('verify');
-
-
-    $file = debug_backtrace()[0]['file'];
-
-    foreach(Route::$routes as $key => $route) {
-      if (in_array($route['name'], Auth::$protectedRoutes)) {
-        $route['file'] = basename($file);
-
-        Route::$routes[$key]['file'] = basename($file);
-      }
-    }
+    });
   }
 
   /**
@@ -145,7 +93,7 @@ class Auth
     $model = (new $model)
                 ->where(
                     config('auth.provider.' . Auth::$provider . '.with'),
-                    Remember::user()
+                    Remember::user() ?? 'null'
                   )
                 ->first();
 
@@ -195,9 +143,9 @@ class Auth
    *
    * @param array $data
    * @param array $hidden
-   * @return array
+   * @return Model|array
    */
-  public static function attempt(array $data, ?array $hidden = null, ?string $provider = null) : ?array
+  public static function attempt(array $data, ?array $hidden = null, ?string $provider = null)
   {
     if ($provider != null) Auth::provider($provider);
 
@@ -238,6 +186,6 @@ class Auth
       if (!password_verify($protects, $model->{$protected})) return [$first => $protected . " or " . $first . " is incorrect."];
     }
 
-    return ['__MUST_RETURN__' => $model];
+    return $model;
   }
 }
