@@ -4,9 +4,12 @@ namespace Modulus\Security;
 
 use Exception;
 use AtlantisPHP\Swish\Route;
+use Modulus\Support\Extendable;
 
 class Auth
 {
+  use Extendable;
+
   /**
    * $user
    *
