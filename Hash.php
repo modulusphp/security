@@ -2,8 +2,12 @@
 
 namespace Modulus\Security;
 
+use Modulus\Support\Extendable;
+
 class Hash
 {
+  use Extendable;
+
   /**
    * Make hash
    *
