@@ -1,4 +1,4 @@
-# modulusPHP Security Component
+# Modulus Security Component
 
 This package contains auth routes, string hasher, and the Modulus Remember Me component.
 
