@@ -109,6 +109,7 @@ class Remember
       unset($_SESSION['remembered_by_cookie']);
       exit();
     }
+
     if ($loginResult->isExpired() && !empty($_SESSION['_uas'])) {
       sleep(5);
     }

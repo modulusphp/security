@@ -6,7 +6,7 @@ use Exception;
 use AtlantisPHP\Swish\Route;
 use Modulus\Support\Extendable;
 
-class Auth
+final class Auth
 {
   use Extendable;
 
@@ -23,6 +23,17 @@ class Auth
    * @var string
    */
   public static $provider = 'web';
+
+  /**
+   * Init a new auth instance
+   *
+   * @param string $provider
+   * @return void
+   */
+   public function __construct(string $provider = 'web')
+   {
+     $this::$provider = $provider;
+   }
 
   /**
    * Register auth routes
@@ -67,8 +78,7 @@ class Auth
    */
   public static function provider(string $provider) : Auth
   {
-    Auth::$provider = $provider;
-    return new Auth;
+    return new Auth($provider);
   }
 
   /**
@@ -156,12 +166,11 @@ class Auth
 
     $model = new $model;
 
-    try {
-      $protected = config('auth.provider.' . Auth::$provider . '.protects');
-    }
-    catch (Exception $e) {
+    if (config('auth.provider.' . Auth::$provider . '.protects') == null) {
       throw new Exception("The \"" . Auth::$provider . "\" provider doesn't protect any field.");
     }
+
+    $protected = config('auth.provider.' . Auth::$provider . '.protects');
 
     $protects = $data[$protected];
 
@@ -184,8 +193,7 @@ class Auth
 
     if ($secretInformation['algoName'] == 'unknown' && $secretInformation['options'] == []) {
       if ($model->{$protected} !== $protects) return [$first => $protected . " or " . $first . " is incorrect."];
-    }
-    else {
+    } else {
       if (!password_verify($protects, $model->{$protected})) return [$first => $protected . " or " . $first . " is incorrect."];
     }
 

@@ -4,7 +4,7 @@ namespace Modulus\Security;
 
 use Modulus\Support\Extendable;
 
-class Hash
+final class Hash
 {
   use Extendable;
 
