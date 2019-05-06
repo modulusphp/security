@@ -8,7 +8,7 @@ Install
 This package is automatically installed with the Modulus Framework.
 
 ```
-composer require modulusphp/hibernate
+composer require modulusphp/security
 ```
 
 Security
